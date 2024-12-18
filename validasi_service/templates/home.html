@@ -28,7 +28,31 @@
          <button onclick="logout()">Logout</button>
          <h1 class="my-4">Daftar Pengajuan Cuti Mahasiswa</h1>
 
-         <!-- Tabel untuk menampilkan data pengajuan cuti -->
+         <div id="systemStatus" class="mb-4">
+            <strong>Status Sistem Pengajuan: </strong>
+            {% if redis_status == 'active' %}
+            <span id="statusText" class="badge badge-success">
+                Aktif
+            </span>
+            {% else %}
+            <span id="statusText" class="badge badge-danger">
+                Tidak Aktif
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- Tombol Open/Close untuk Sistem Pengajuan -->
+        <button id="openSystem" class="btn btn-success mb-4">
+            Buka Pengajuan
+        </button>
+        <button id="closeSystem" class="btn btn-danger mb-4">
+            Tutup Pengajuan
+        </button>
+        <!-- <button id="closeSystem" class="btn btn-danger mb-4" {% if redis_status == 'inactive' %}disabled{% endif %}>
+            Tutup Pengajuan
+        </button> -->
+
+
          <table class="table table-bordered">
             <thead>
                <tr>
@@ -40,28 +64,114 @@
                </tr>
             </thead>
             <tbody>
-               {% for req in data %}
-               <tr>
-                  <td>{{ req.id }}</td>
-                  <td>{{ req.nama }}</td>
-                  <td>{{ req.alasan }}</td>
-                  <td>{{ req.status.name }}</td>
-                  <td></td>
-               </tr>
-               {% else %}
-               <tr>
-                  <td colspan="5" class="text-center">
-                     Tidak ada data pengajuan cuti
-                  </td>
-               </tr>
-               {% endfor %}
+                {% for req in data %}
+                    <tr>
+                        <td>{{ req.id }}</td>
+                        <td>{{ req.nama }}</td>
+                        <td>{{ req.alasan }}</td>
+                        <td>
+                            {{ req.status.name }}
+                        </td>
+                        <td>
+
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">Tidak ada data pengajuan cuti</td>
+                    </tr>
+                {% endfor %}
             </tbody>
          </table>
       </div>
 
-      <!-- Bootstrap JS (optional) -->
-      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-   </body>
+    <script>
+        document.getElementById('openSystem').addEventListener('click', function() {
+            sendToggleRequest('open');
+            console.log('open');
+        });
+
+        document.getElementById('closeSystem').addEventListener('click', function() {
+            sendToggleRequest('close');
+            console.log('close');
+        });
+
+        // // Event Listener untuk Tombol Open/Close Sistem Pengajuan
+        // document.getElementById("toggleSystem").addEventListener("click", function() {
+        //     const isOpen = confirm("Apakah Anda yakin ingin menutup/membuka sistem pengajuan cuti?");
+        //     const action = isOpen ? "open" : "close";
+        //     fetch("/toggle_system", {
+        //         method: "POST",
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //         },
+        //         body: JSON.stringify({ action: action })
+        //     })
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         alert(data.message);
+        //     })
+        //     .catch(error => {
+        //         console.error("Error:", error);
+        //         alert("Terjadi kesalahan.");
+        //     });
+        // });
+
+        const buttons = document.querySelectorAll("button[data-action]");
+
+        buttons.forEach(button => {
+            button.addEventListener("click", function(event) {
+                event.preventDefault();
+                const leaveRequestId = this.getAttribute("data-id");
+                const action = this.getAttribute("data-action");
+
+                const data = {
+                    id: leaveRequestId,
+                    action: action
+                };
+
+                fetch("/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Terjadi kesalahan.");
+                });
+            });
+        });
+
+
+        function sendToggleRequest(action) {
+            console.log(action);
+            fetch('/toggle_system', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: action }) // Mengirimkan data JSON dengan action yang dipilih
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message); // Menampilkan pesan respons dari server
+            })
+            .catch(error => {
+                console.error('Error:', error); // Menangani error jika ada
+            });
+        }
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
 </html>

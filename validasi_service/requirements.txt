@@ -8,3 +8,6 @@ flask_bcrypt
 
 pyjwt
 
+
+redis
+rq
