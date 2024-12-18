@@ -1,14 +1,76 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, redirect, url_for
 from models import db, PengajuanCuti
 import redis
 from rq import Queue
 from rq.job import Job
+import jwt
+from functools import wraps
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:password@db/sicuti'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SECRET_KEY"] = "your_secret_key"
+
 db.init_app(app)
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.cookies.get("token")  # Ambil token dari cookie
+        print(token)
+        if not token:
+            return redirect(
+                "http://localhost:5003/"
+            )  # Redirect ke login jika token tidak ada
+        try:
+            decoded_token = jwt.decode(
+                token, app.config["SECRET_KEY"], algorithms=["HS256"]
+            )
+            request.user_id = decoded_token["user_id"]
+            request.role = decoded_token["role"]
+        except jwt.ExpiredSignatureError:
+            return redirect(
+                "http://localhost:5003/"
+            )  # Redirect ke login jika token kadaluarsa
+        except jwt.InvalidTokenError:
+            return redirect(
+                "http://localhost:5003/"
+            )  # Redirect ke login jika token tidak valid
+        return f(*args, **kwargs)
+
+    return decorated
+
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.cookies.get("token")  # Ambil token dari cookie
+        print(token)
+        if not token:
+            return redirect(
+                "http://localhost:5003/"
+            )  # Redirect ke login jika token tidak ada
+        try:
+            decoded_token = jwt.decode(
+                token, app.config["SECRET_KEY"], algorithms=["HS256"]
+            )
+            request.user_id = decoded_token["user_id"]
+            request.role = decoded_token["role"]
+        except jwt.ExpiredSignatureError:
+            return redirect(
+                "http://localhost:5003/"
+            )  # Redirect ke login jika token kadaluarsa
+        except jwt.InvalidTokenError:
+            return redirect(
+                "http://localhost:5003/"
+            )  # Redirect ke login jika token tidak valid
+        return f(*args, **kwargs)
+
+    return decorated
+
 
 redis_conn = redis.StrictRedis(host='redis', port=6379, db=0)
 queue = Queue(connection=redis_conn)
@@ -22,7 +84,7 @@ queue = Queue(connection=redis_conn)
 #             if request.endpoint == 'apply':
 #                 return jsonify({"message": "Sistem pengajuan cuti sedang ditutup. Cuti tidak dapat diajukan."}), 403
 #         redis_conn.set('admin_service_status', 'active', ex=60)
-        
+
 #     except Exception as e:
 #         redis_conn.set('admin_service_status', 'inactive', ex=60)
 #         print(f"Error while checking system status: {e}")
@@ -51,7 +113,7 @@ def check_status():
         admin_status = redis_conn.get('admin_service_status')
 
         if admin_status:
-            redis_status = admin_status.decode('utf-8') 
+            redis_status = admin_status.decode('utf-8')
         else:
             redis_status = 'inactive'
 
@@ -62,6 +124,7 @@ def check_status():
 
 
 @app.route('/', methods=['GET', 'POST'])
+@token_required
 def get_leave_requests():
     try:
         redis_conn.ping()
@@ -75,7 +138,7 @@ def get_leave_requests():
         pengajuan_id = data.get("id")
         action = data.get("action")
         pengajuan = PengajuanCuti.query.get_or_404(pengajuan_id)
-        
+
         if action == 'approve':
             pengajuan.status = 'Disetujui'
             message = "Leave request approved!"
@@ -90,6 +153,24 @@ def get_leave_requests():
 
     data_cuti = PengajuanCuti.query.all()
     return render_template('home.html', data=data_cuti, redis_status=redis_status)
+
+
+@app.route("/logout", methods=["POST"])
+@token_required
+def logout():
+    response = jsonify({"message": "Logged out successfully!"})
+    response.delete_cookie("token")
+    return response
+
+
+
+@app.route("/logout", methods=["POST"])
+@token_required
+def logout():
+    response = jsonify({"message": "Logged out successfully!"})
+    response.delete_cookie("token")
+    return response
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

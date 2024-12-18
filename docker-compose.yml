@@ -1,18 +1,16 @@
-version: '3.8'
+# version: "3.8"
 
 services:
   mahasiswa:
     build: ./pengajuan_service
     container_name: pengajuan_service
     ports:
-      - "5001:5000" 
+      - "5001:5000"
     depends_on:
       - db
-      - redis  # Menambahkan dependensi pada Redis
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=development
-      - REDIS_HOST=redis  # Variabel lingkungan untuk menghubungkan ke Redis
     volumes:
       - ./pengajuan_service:/app
 
@@ -31,6 +29,19 @@ services:
     volumes:
       - ./validasi_service:/app
 
+  login:
+    build: ./login_service
+    container_name: login_service
+    ports:
+      - "5003:5000"
+    depends_on:
+      - db
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+    volumes:
+      - ./login_service:/app
+
   db:
     image: mysql:5.7
     container_name: mysql_db
@@ -43,12 +54,12 @@ services:
       - "3309:3306"
 
   redis:
-    image: redis:alpine 
+    image: redis:alpine
     container_name: redis
     ports:
       - "6379:6379"
     volumes:
-      - redis-data:/data  
+      - redis-data:/data
 
 volumes:
   db-data:

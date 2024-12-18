@@ -1,5 +1,13 @@
 flask
 flask_sqlalchemy
 mysql-connector-python
+werkzeug
+
+flask_bcrypt
+
+
+pyjwt
+
+
 redis
 rq

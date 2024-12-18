@@ -1,16 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Pengajuan Cuti Mahasiswa</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container">
-        <h1 class="my-4">Daftar Pengajuan Cuti Mahasiswa</h1>
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Daftar Pengajuan Cuti Mahasiswa</title>
+      <link
+         rel="stylesheet"
+         href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      />
+   </head>
+   <script>
+      async function logout() {
+         const response = await fetch("http://localhost:5002//logout", {
+            method: "POST",
+         });
+         if (response.ok) {
+            document.cookie =
+               "token=;path=/;expires=Thu, 01 Jan 1970 00:00:00 UTC;"; // Hapus token
+            window.location.href = "http://localhost:5003/"; // Redirect ke login
+         } else {
+            alert("Failed to logout.");
+         }
+      }
+   </script>
+   <body>
+      <div class="container">
+         <button onclick="logout()">Logout</button>
+         <h1 class="my-4">Daftar Pengajuan Cuti Mahasiswa</h1>
 
-        <div id="systemStatus" class="mb-4">
+         <div id="systemStatus" class="mb-4">
             <strong>Status Sistem Pengajuan: </strong>
             {% if redis_status == 'active' %}
             <span id="statusText" class="badge badge-success">
@@ -33,17 +51,17 @@
         <!-- <button id="closeSystem" class="btn btn-danger mb-4" {% if redis_status == 'inactive' %}disabled{% endif %}>
             Tutup Pengajuan
         </button> -->
-        
 
-        <table class="table table-bordered">
+
+         <table class="table table-bordered">
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nama Mahasiswa</th>
-                    <th>Alasan</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
+               <tr>
+                  <th>ID</th>
+                  <th>Nama Mahasiswa</th>
+                  <th>Alasan</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+               </tr>
             </thead>
             <tbody>
                 {% for req in data %}
@@ -52,21 +70,20 @@
                         <td>{{ req.nama }}</td>
                         <td>{{ req.alasan }}</td>
                         <td>
-                            <div class="p-2 text-center {% if req.status.name == 'Disetujui' %}bg-success{% elif req.status.name == 'Ditolak' %}bg-danger{% elif req.status.name == 'Closed' %}bg-dark{% else %}bg-warning{% endif %} rounded-lg" style="color: white;">
-                                {{ req.status.name }}
-                            </div>                            
+                            {{ req.status.name }}
                         </td>
-                        <td class="d-flex">
-                            {% if req.status.name == 'Pending' %}
-                                <button class="btn btn-primary mr-3" data-action="approve" data-id="{{ req.id }}">Approve</button>
-                                <button class="btn btn-danger" data-action="reject" data-id="{{ req.id }}">Tolak</button>
-                            {% endif %}
+                        <td>
+
                         </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">Tidak ada data pengajuan cuti</td>
                     </tr>
                 {% endfor %}
             </tbody>
-        </table>
-    </div>
+         </table>
+      </div>
 
     <script>
         document.getElementById('openSystem').addEventListener('click', function() {
@@ -75,7 +92,7 @@
         });
 
         document.getElementById('closeSystem').addEventListener('click', function() {
-            sendToggleRequest('close'); 
+            sendToggleRequest('close');
             console.log('close');
         });
 

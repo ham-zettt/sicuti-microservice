@@ -1,14 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mahasiswa</title>
-</head>
-<body>
-    <h1>Selamat datang Mahasiswa</h1>
-    <a href="/apply">
-        <button>Ajukan Cuti</button>
-    </a>
-</body>
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Mahasiswa</title>
+      <script>
+         async function logout() {
+            const response = await fetch("http://localhost:5001//logout", {
+               method: "POST",
+            });
+            if (response.ok) {
+               document.cookie =
+                  "token=;path=/;expires=Thu, 01 Jan 1970 00:00:00 UTC;"; // Hapus token
+               window.location.href = "http://localhost:5003/"; // Redirect ke login
+            } else {
+               alert("Failed to logout.");
+            }
+         }
+      </script>
+   </head>
+   <body>
+      <button onclick="logout()">Logout</button>
+      <h1>Selamat datang Mahasiswa</h1>
+      <a href="/apply_form">
+         <button>Ajukan Cuti</button>
+      </a>
+   </body>
 </html>
