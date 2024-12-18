@@ -1,51 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Pengajuan Cuti Mahasiswa</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container">
-        <h1 class="my-4">Daftar Pengajuan Cuti Mahasiswa</h1>
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Daftar Pengajuan Cuti Mahasiswa</title>
+      <link
+         rel="stylesheet"
+         href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      />
+   </head>
+   <script>
+      async function logout() {
+         const response = await fetch("http://localhost:5002//logout", {
+            method: "POST",
+         });
+         if (response.ok) {
+            document.cookie =
+               "token=;path=/;expires=Thu, 01 Jan 1970 00:00:00 UTC;"; // Hapus token
+            window.location.href = "http://localhost:5003/"; // Redirect ke login
+         } else {
+            alert("Failed to logout.");
+         }
+      }
+   </script>
+   <body>
+      <div class="container">
+         <button onclick="logout()">Logout</button>
+         <h1 class="my-4">Daftar Pengajuan Cuti Mahasiswa</h1>
 
-        <!-- Tabel untuk menampilkan data pengajuan cuti -->
-        <table class="table table-bordered">
+         <!-- Tabel untuk menampilkan data pengajuan cuti -->
+         <table class="table table-bordered">
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nama Mahasiswa</th>
-                    <th>Alasan</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
+               <tr>
+                  <th>ID</th>
+                  <th>Nama Mahasiswa</th>
+                  <th>Alasan</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+               </tr>
             </thead>
             <tbody>
-                {% for req in data %}
-                    <tr>
-                        <td>{{ req.id }}</td>
-                        <td>{{ req.nama }}</td>
-                        <td>{{ req.alasan }}</td>
-                        <td>
-                            {{ req.status.name }}
-                        </td>
-                        <td>
-                           
-                        </td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center">Tidak ada data pengajuan cuti</td>
-                    </tr>
-                {% endfor %}
+               {% for req in data %}
+               <tr>
+                  <td>{{ req.id }}</td>
+                  <td>{{ req.nama }}</td>
+                  <td>{{ req.alasan }}</td>
+                  <td>{{ req.status.name }}</td>
+                  <td></td>
+               </tr>
+               {% else %}
+               <tr>
+                  <td colspan="5" class="text-center">
+                     Tidak ada data pengajuan cuti
+                  </td>
+               </tr>
+               {% endfor %}
             </tbody>
-        </table>
-    </div>
+         </table>
+      </div>
 
-    <!-- Bootstrap JS (optional) -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-</body>
+      <!-- Bootstrap JS (optional) -->
+      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+   </body>
 </html>
